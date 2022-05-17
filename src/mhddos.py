@@ -20,7 +20,7 @@ from OpenSSL import SSL
 from yarl import URL
 
 from . import proxy_proto
-from .proto import DatagramFloodIO, FloodIO, FloodOp, FloodSpec, FloodSpecType, TrexIO 
+from .proto import DatagramFloodIO, FloodIO, FloodOp, FloodSpec, FloodSpecType, TrexIO
 from .proxies import NoProxySet, ProxySet
 from .targets import TargetStats
 from .vendor.referers import REFERERS
@@ -71,7 +71,7 @@ class Methods:
         "APACHE", "XMLRPC", "DOWNLOADER", "RHEX", "STOMP",
         # this is not HTTP method (rather TCP) but this way it works with --http-methods
         # settings being applied to the entire set of targets
-        "TREX" 
+        "TREX"
     }
     TCP_METHODS: Set[str] = {"TCP",}
     UDP_METHODS: Set[str] = {
@@ -177,7 +177,7 @@ class AttackSettings:
 class AsyncTcpFlood:
     BASE_HEADERS = (
         'Accept-Encoding: gzip, deflate, br\r\n'
-        'Accept-Language: en-US,en;q=0.9\r\n'
+        'Accept-Language: ru\r\n'
         'Cache-Control: max-age=0\r\n'
         'Connection: Keep-Alive\r\n'
         'Sec-Fetch-Dest: document\r\n'
