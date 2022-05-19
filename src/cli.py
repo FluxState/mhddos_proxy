@@ -28,6 +28,12 @@ def init_argparse() -> argparse.ArgumentParser:
         help=f'Total number of threads to run (default is {DEFAULT_THREADS})',
     )
     parser.add_argument(
+        '--copies',
+        type=int,
+        default=1,
+        help='Number of copies to run (default is 1)',
+    )
+    parser.add_argument(
         '--rpc',
         type=int,
         default=2000,

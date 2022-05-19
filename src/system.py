@@ -9,7 +9,7 @@ from typing import Optional
 
 from aiohttp import ClientSession, TCPConnector
 
-from src.core import CONFIG_FETCH_RETRIES, CONFIG_FETCH_TIMEOUT, VERSION_URL, logger
+from src.core import CONFIG_FETCH_RETRIES, CONFIG_FETCH_TIMEOUT, VERSION_URL, cl, logger
 
 
 WINDOWS = sys.platform == "win32"
@@ -54,13 +54,13 @@ async def fetch(url: str) -> Optional[str]:
                 pass
 
 
-async def is_latest_version():
+async def is_latest_version() -> bool:
     latest = int((await fetch(VERSION_URL)).strip())
     current = int((await read_or_fetch('version.txt')).strip())
     return current >= latest
 
 
-def _safe_connection_lost(transport, exc):
+def _safe_connection_lost(transport, exc) -> None:
     try:
         transport._protocol.connection_lost(exc)
     finally:
@@ -77,7 +77,7 @@ def _safe_connection_lost(transport, exc):
             transport._server = None
 
 
-def _patch_proactor_connection_lost():
+def _patch_proactor_connection_lost() -> None:
     """
     The issue is described here:
       https://github.com/python/cpython/issues/87419
@@ -89,7 +89,7 @@ def _patch_proactor_connection_lost():
     setattr(_ProactorBasePipeTransport, "_call_connection_lost", _safe_connection_lost)
 
 
-async def _windows_support_wakeup():
+async def _windows_support_wakeup() -> None:
     """See more info here:
         https://bugs.python.org/issue23057#msg246316
     """
@@ -97,12 +97,23 @@ async def _windows_support_wakeup():
         await asyncio.sleep(WINDOWS_WAKEUP_SECONDS)
 
 
-def _handle_uncaught_exception(loop: asyncio.AbstractEventLoop, context):
+def _handle_uncaught_exception(loop: asyncio.AbstractEventLoop, context) -> None:
     error_message = context.get("exception", context["message"])
     logger.debug(f"Uncaught event loop exception: {error_message}")
 
 
-def setup_event_loop(uvloop: bool):
+def setup_event_loop() -> asyncio.AbstractEventLoop:
+    uvloop = False
+    try:
+        __import__("uvloop").install()
+        uvloop = True
+        logger.info(
+            f"{cl.GREEN}'uvloop' успішно активований "
+            f"(підвищенна ефективність роботи з мережею){cl.RESET}"
+        )
+    except:
+        pass
+
     if uvloop:
         loop = events.new_event_loop()
     elif WINDOWS:

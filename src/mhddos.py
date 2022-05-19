@@ -175,6 +175,7 @@ class AttackSettings:
 
 
 class AsyncTcpFlood:
+
     BASE_HEADERS = (
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n'
         'Accept-Encoding: gzip, deflate, br\r\n'
@@ -217,10 +218,15 @@ class AsyncTcpFlood:
             else "GET"
         )
 
+        self._method = method
         self.SENT_FLOOD = getattr(self, method)
 
         self._loop = loop
         self._settings = settings or AttackSettings()
+
+    @property
+    def desc(self) -> Tuple[str, int, str]:
+        return (self._target.host, self._target.port, self._method)
 
     @property
     def is_tls(self):
@@ -665,6 +671,7 @@ class AsyncTcpFlood:
 
 
 class AsyncUdpFlood:
+
     def __init__(
         self,
         target: Tuple[str, int],
@@ -683,7 +690,13 @@ class AsyncUdpFlood:
         self._loop = loop
         self._settings = settings or AttackSettings()
 
+        self._method = method
         self.SENT_FLOOD = getattr(self, method)
+
+    @property
+    def desc(self) -> Tuple[str, int, str]:
+        addr, port = self._target
+        return (addr, port, self._method)
 
     async def run(self) -> bool:
         return await self.SENT_FLOOD()

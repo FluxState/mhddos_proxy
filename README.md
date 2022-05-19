@@ -1,14 +1,16 @@
 ## DDoS Tool for IT Army of Ukraine 
 
 - Вбудована база проксі для атаки з величезної кількості IP по всьому світу
-- Можливість атаки багатьох цілей з автоматичним балансуванням навантаження
-- Безліч різноманітних методів для атаки
+- Можливість задавати багато цілей з автоматичним балансуванням навантаження
+- Безліч різноманітних DDoS методів
 - Ефективне використання ресурсів завдяки асихронній архітектурі
 
 ### ⏱ Останні оновлення
   
 Оновлення версії для Windows | Mac | Linux | Android | Docker: https://telegra.ph/Onovlennya-mhddos-proxy-04-16  
-  
+
+- **18.05.2022**
+  - Додано налаштування `--copies` для запуску декількох копій (рекомендовано до використання при наявності 4+ CPU та мережі > 100 Mb/s).
 
 - **15.05.2022**
   - Повністю оновлена асинхронна версія, що забезпечує максимальну ефективність та мінімальне навантаження на систему
@@ -103,6 +105,7 @@
                      [--rpc RPC] 
                      [--http-methods METHOD [METHOD ...]]
                      [--itarmy]
+                     [--copies COPIES]
 
     positional arguments:
       targets                List of targets, separated by space
@@ -118,6 +121,7 @@
       --proxies URL|path     URL or local path(ex. proxies.txt) to file with proxies to use
       --http-methods GET     List of HTTP(s) attack methods to use (default is GET + POST|STRESS).
       --itarmy               Attack targets from https://t.me/itarmyofukraine2022  
+      --copies 1             Number of copies to run (default is 1)
 
 ### Власні проксі
 

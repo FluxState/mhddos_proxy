@@ -1,5 +1,5 @@
-from asyncio.log import logger as asyncio_logger
 import logging
+from asyncio.log import logger as asyncio_logger
 from multiprocessing import cpu_count
 from pathlib import Path
 
@@ -32,11 +32,9 @@ PROXIES_URLS = (
 IT_ARMY_CONFIG_URL = 'https://gist.githubusercontent.com/ddosukraine2022/f739250dba308a7a2215617b17114be9/raw/mhdos_targets_tcp_v2.txt'
 VERSION_URL = 'https://raw.githubusercontent.com/porthole-ascend-cinnamon/mhddos_proxy/main/version.txt'
 
-LOW_PROFILE_THREADS = 1_000
-HIGH_PROFILE_THREADS = 7_500
+DEFAULT_THREADS = 1000 if cpu_count() == 1 else 7500
 
-DEFAULT_THREADS = LOW_PROFILE_THREADS if cpu_count() == 1 else HIGH_PROFILE_THREADS
-
+CPU_PER_PROCESS = 2
 CONFIG_FETCH_RETRIES = 3
 CONFIG_FETCH_TIMEOUT = 10
 REFRESH_OVERTIME = 2  # roughly 5 more seconds
@@ -46,6 +44,7 @@ FAILURE_DELAY_SECONDS = 1
 ONLY_MY_IP = 100
 SCHEDULER_INITIAL_CAPACITY = 3
 SCHEDULER_MIN_INIT_FRACTION = 0.1
+SCHEDULER_MAX_INIT_FRACTION = 0.5
 SCHEDULER_FORK_SCALE = 3
 SCHEDULER_FAILURE_DELAY = 0.5
 CONN_PROBE_PERIOD = 5
