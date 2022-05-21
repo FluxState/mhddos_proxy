@@ -1,9 +1,13 @@
 import logging
+import warnings
 from asyncio.log import logger as asyncio_logger
 from multiprocessing import cpu_count
 from pathlib import Path
 
 from colorama import Fore
+
+
+warnings.filterwarnings("ignore")
 
 
 class RemoveUselessWarnings(logging.Filter):
@@ -35,8 +39,8 @@ VERSION_URL = 'https://raw.githubusercontent.com/porthole-ascend-cinnamon/mhddos
 DEFAULT_THREADS = 1000 if cpu_count() == 1 else 7500
 
 CPU_PER_PROCESS = 2
-CONFIG_FETCH_RETRIES = 3
-CONFIG_FETCH_TIMEOUT = 10
+CONFIG_FETCH_RETRIES = 5
+CONFIG_FETCH_TIMEOUT = 15
 REFRESH_OVERTIME = 2  # roughly 5 more seconds
 REFRESH_RATE = 5
 FAILURE_BUDGET_FACTOR = 3

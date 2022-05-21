@@ -6,9 +6,7 @@ import sys
 from asyncio import events
 from contextlib import suppress
 from typing import Optional
-
-from aiohttp import ClientSession, TCPConnector
-
+import requests
 from src.core import CONFIG_FETCH_RETRIES, CONFIG_FETCH_TIMEOUT, VERSION_URL, cl, logger
 
 
@@ -22,17 +20,21 @@ def fix_ulimits() -> Optional[int]:
     except ImportError:
         return None
 
-    min_hard = 2 ** 16
+    min_limit = 2 ** 15
     soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
     # Try to raise hard limit if it's too low
-    if hard < min_hard:
-        with suppress(Exception):
-            resource.setrlimit(resource.RLIMIT_NOFILE, (min_hard, min_hard))
-            return min_hard
+    if hard < min_limit:
+        with suppress(ValueError):
+            resource.setrlimit(resource.RLIMIT_NOFILE, (min_limit, min_limit))
+            soft = hard = min_limit
 
-    # At least raise soft limit to the hard limit
-    resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
-    return hard
+    # Try to raise soft limit to hard limit
+    if soft < hard:
+        with suppress(ValueError):
+            resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+            soft = hard
+
+    return soft
 
 
 async def read_or_fetch(path_or_url: str) -> Optional[str]:
@@ -42,16 +44,20 @@ async def read_or_fetch(path_or_url: str) -> Optional[str]:
     return await fetch(path_or_url)
 
 
+def sync_fetch(url: str):
+    for _ in range(CONFIG_FETCH_RETRIES):
+        try:
+            response = requests.get(url, verify=False, timeout=CONFIG_FETCH_TIMEOUT)
+            response.raise_for_status()
+            return response.text
+        except requests.RequestException:
+            pass
+    return None
+
+
 async def fetch(url: str) -> Optional[str]:
-    async with ClientSession(connector=TCPConnector(ssl=False)) as session:
-        for _ in range(CONFIG_FETCH_RETRIES):
-            try:
-                async with session.get(url, timeout=CONFIG_FETCH_TIMEOUT) as response:
-                    return await response.text()
-            except asyncio.CancelledError:
-                raise
-            except Exception:
-                pass
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, sync_fetch, url)
 
 
 async def is_latest_version() -> bool:
