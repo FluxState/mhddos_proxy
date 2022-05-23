@@ -6,8 +6,11 @@ import sys
 from asyncio import events
 from contextlib import suppress
 from typing import Optional
+
 import requests
+
 from src.core import CONFIG_FETCH_RETRIES, CONFIG_FETCH_TIMEOUT, VERSION_URL, cl, logger
+from src.i18n import translate as t
 
 
 WINDOWS = sys.platform == "win32"
@@ -113,10 +116,7 @@ def setup_event_loop() -> asyncio.AbstractEventLoop:
     try:
         __import__("uvloop").install()
         uvloop = True
-        logger.info(
-            f"{cl.GREEN}'uvloop' успішно активований "
-            f"(підвищенна ефективність роботи з мережею){cl.RESET}"
-        )
+        logger.info(f"{t('`uvloop` activated successfully')} {t('(increased network efficiency)')}")
     except:
         pass
 

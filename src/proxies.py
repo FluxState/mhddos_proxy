@@ -60,7 +60,7 @@ class ProxySet:
         if not proxies:
             return 0
 
-        # resolve DNS entires in case proxy is given using hostname rather than IP
+        # resolve DNS entries in case proxy is given using hostname rather than IP
         urls = [URL(proxy_url) for proxy_url in proxies]
         ips = await resolve_all([url.host for url in urls])
         proxies = [str(url.with_host(ips.get(url.host, url.host))) for url in urls]

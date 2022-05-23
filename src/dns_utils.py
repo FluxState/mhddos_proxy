@@ -7,6 +7,7 @@ import dns.exception
 from asyncstdlib.functools import lru_cache
 
 from .core import cl, logger
+from .i18n import translate as t
 
 
 socket.setdefaulttimeout(3)
@@ -30,8 +31,8 @@ async def safe_resolve_host(host: str) -> Optional[str]:
         return resolved
     except (dns.exception.DNSException, gaierror):
         logger.warning(
-            f"{cl.YELLOW}Ціль {cl.BLUE}{host}{cl.YELLOW} не доступна "
-            f"і {cl.RED}не буде атакована{cl.RESET}"
+            f"{cl.MAGENTA}{t('Target')} {cl.BLUE}{host}{cl.MAGENTA}"
+            f""" {t("is not available and won't be attacked")}{cl.RESET}"""
         )
 
 

@@ -1,3 +1,4 @@
+import os
 import time
 from hashlib import md5
 from typing import Dict, List, Optional, Tuple
@@ -7,6 +8,7 @@ from yarl import URL
 
 from .core import cl, logger
 from .dns_utils import resolve_all_targets
+from .i18n import translate as t
 from .system import read_or_fetch
 
 
@@ -117,8 +119,8 @@ class TargetsLoader:
         config_targets = await self._load_config()
         if config_targets:
             logger.info(
-                f"{cl.YELLOW}Завантажено конфіг {self._config} "
-                f"на {cl.BLUE}{len(config_targets)} цілей{cl.RESET}"
+                f"{cl.YELLOW}{t('Loaded config')} {cl.BLUE}{os.path.basename(self._config)}{cl.YELLOW} "
+                f"{t('for')} {cl.BLUE}{len(config_targets)} {t('targets')}{cl.RESET}"
             )
         all_targets = self._targets + (config_targets or [])
         if resolve:

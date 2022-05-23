@@ -2,9 +2,10 @@ import argparse
 import random
 
 from .core import (
-    DEFAULT_THREADS,
-    SCHEDULER_INITIAL_CAPACITY, SCHEDULER_FORK_SCALE, SCHEDULER_FAILURE_DELAY,
+    DEFAULT_THREADS, SCHEDULER_FAILURE_DELAY,
+    SCHEDULER_FORK_SCALE, SCHEDULER_INITIAL_CAPACITY
 )
+from .i18n import LANGUAGES
 from .mhddos import Methods
 
 
@@ -32,12 +33,6 @@ def init_argparse() -> argparse.ArgumentParser:
         type=int,
         default=1,
         help='Number of copies to run (default is 1)',
-    )
-    parser.add_argument(
-        '--rpc',
-        type=int,
-        default=2000,
-        help='How many requests to send on a single proxy connection (default is 2000)',
     )
     parser.add_argument(
         '--debug',
@@ -68,7 +63,7 @@ def init_argparse() -> argparse.ArgumentParser:
         type=str.upper,
         default=['GET', random.choice(['POST', 'STRESS'])],
         choices=Methods.HTTP_METHODS,
-        help='List of HTTP(s) attack methods to use. Default is GET + POST|STRESS',
+        help='List of HTTP(L7) methods to use. Default is GET + POST|STRESS',
     )
     parser.add_argument(
         '--proxies',
@@ -78,9 +73,23 @@ def init_argparse() -> argparse.ArgumentParser:
         '--itarmy',
         action='store_true',
         default=False,
+        help='Attack targets from https://t.me/itarmyofukraine2022'
+    )
+    parser.add_argument(
+        '--lang',
+        type=str.lower,
+        choices=LANGUAGES,
+        default=LANGUAGES[0],
+        help='Select language (default is ua)'
     )
 
     # Advanced
+    parser.add_argument(
+        '--rpc',
+        type=int,
+        default=2000,
+        help='How many requests to send on a single proxy connection (default is 2000)',
+    )
     parser.add_argument(
         '--scheduler-initial-capacity',
         type=int,

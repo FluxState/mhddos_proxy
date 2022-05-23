@@ -17,6 +17,7 @@ from src.core import (
     IT_ARMY_CONFIG_URL, ONLY_MY_IP, REFRESH_OVERTIME, REFRESH_RATE,
     SCHEDULER_MAX_INIT_FRACTION, SCHEDULER_MIN_INIT_FRACTION, cl, logger
 )
+from src.i18n import set_language, translate as t
 from src.mhddos import AsyncTcpFlood, AsyncUdpFlood, AttackSettings, main as mhddos_main
 from src.output import print_banner, print_progress, show_statistic
 from src.proxies import ProxySet
@@ -129,13 +130,15 @@ async def run_ddos(
 ):
     loop = asyncio.get_event_loop()
     stats = []
+    print_stats = debug or table
+
+    logger.info(f"{cl.GREEN}{t('Launching the attack ...')}{cl.RESET}")
 
     # initial set of proxies
     if proxies.has_proxies:
-        logger.info(f'{cl.YELLOW}Завантажуємо проксі...{cl.RESET}')
         num_proxies = await proxies.reload()
         if num_proxies == 0:
-            logger.error(f"{cl.RED}Не знайдено робочих проксі - зупиняємо атаку{cl.RESET}")
+            logger.error(f"{cl.RED}{t('No working proxies found - stopping the attack')}{cl.RESET}")
             return
 
     def prepare_flooder(target: Target, method: str) -> Union[AsyncUdpFlood, AsyncTcpFlood]:
@@ -193,7 +196,7 @@ async def run_ddos(
                 for method in http_methods:
                     tcp_flooders.append(prepare_flooder(target, method))
             else:
-                logger.error(f"Unsupported scheme given: {target.url.scheme}")
+                logger.error(f"{cl.RED}Unsupported scheme given: {target.url.scheme}{cl.RESET}")
 
         force_install = False
         if tcp_flooders:
@@ -206,7 +209,7 @@ async def run_ddos(
                 if num_flooders > num_allowed_flooders:
                     random.shuffle(tcp_flooders)
                     tcp_flooders, num_flooders = tcp_flooders[:num_allowed_flooders], num_allowed_flooders
-                    logger.info(f"{cl.MAGENTA}Обрано {num_flooders} цілей для атаки{cl.RESET}")
+                    logger.info(f"{cl.MAGENTA}{t('Selected')} {num_flooders} {t('targets for the attack')}{cl.RESET}")
                     force_install = True
 
             # adjust settings to avoid situation when we have just a few
@@ -234,27 +237,28 @@ async def run_ddos(
             task = loop.create_task(run_udp_flood(flooder))
             active_flooder_tasks.append(task)
 
-        for flooder in tcp_flooders + udp_flooders:
-            logger.info(
-                f"{cl.YELLOW}Атакуємо ціль:{cl.BLUE} %s,"
-                f"{cl.YELLOW} Порт:{cl.BLUE} %s,"
-                f"{cl.YELLOW} Метод:{cl.BLUE} %s{cl.RESET}" % flooder.desc
-            )
+        if not print_stats:
+            for flooder in tcp_flooders + udp_flooders:
+                logger.info(
+                    f"{cl.YELLOW}{t('Target')}:{cl.BLUE} %s,"
+                    f"{cl.YELLOW} {t('Port')}:{cl.BLUE} %s,"
+                    f"{cl.YELLOW} {t('Method')}:{cl.BLUE} %s{cl.RESET}" % flooder.desc
+                )
 
         return force_install
 
     try:
-        logger.info(f'{cl.YELLOW}Завантажуємо цілі...{cl.RESET}')
         initial_targets, _ = await targets_loader.load(resolve=True)
     except Exception as exc:
-        logger.error(f"{cl.RED}Завантаження цілей завершилося помилкою: {exc}{cl.RESET}")
+        logger.error(f"{cl.RED}{t('Targets loading failed')} {exc}{cl.RESET}")
         initial_targets = []
 
     if not initial_targets:
-        logger.error(f'{cl.RED}Не вказано жодної цілі для атаки{cl.RESET}')
+        logger.error(f"{cl.RED}{t('No targets specified for the attack')}{cl.RESET}")
         return
 
-    logger.info(f'{cl.GREEN}Запускаємо атаку...{cl.RESET}')
+    # Give user some time to read the output
+    await asyncio.sleep(5)
     force_install_targets: bool = await install_targets(initial_targets)
 
     tasks = []
@@ -270,19 +274,18 @@ async def run_ddos(
                     stats,
                     table,
                     use_my_ip,
+                    total_threads,
                     num_proxies,
                     passed > REFRESH_RATE * REFRESH_OVERTIME,
                 )
-                if tcp_task_group is not None:
-                    logger.debug(f"Task group size: {len(tcp_task_group)}")
             finally:
                 cycle_start = time.perf_counter()
 
     # setup coroutine to print stats
-    if debug or table:
+    if print_stats:
         tasks.append(loop.create_task(stats_printer()))
     else:
-        print_progress(len(proxies), use_my_ip, False)
+        print_progress(total_threads, len(proxies), use_my_ip, False)
 
     async def reload_targets(delay_seconds: int = 30, force_install: bool = False):
         force_next = force_install
@@ -293,7 +296,7 @@ async def run_ddos(
 
                 if not targets:
                     logger.warning(
-                        f"{cl.MAGENTA}Завантажено порожній конфіг - буде використано попередній{cl.RESET}"
+                        f"{cl.MAGENTA}{t('Empty config loaded - the previous one will be used')}{cl.RESET}"
                     )
 
                 if targets and (changed or force_next):
@@ -302,7 +305,7 @@ async def run_ddos(
             except asyncio.CancelledError as e:
                 raise e
             except Exception as exc:
-                logger.warning(f"{cl.MAGENTA}Не вдалося (пере)завантажити конфіг цілей: {exc}{cl.RESET}")
+                logger.warning(f"{cl.MAGENTA}{t('Failed to (re)load targets config:')} {exc}{cl.RESET}")
 
     # setup coroutine to reload targets
     targets_reloader = loop.create_task(
@@ -315,7 +318,7 @@ async def run_ddos(
                 await asyncio.sleep(delay_seconds)
                 if (await proxies.reload()) == 0:
                     logger.warning(
-                        f"{cl.MAGENTA}Не вдалося перезавантажити список проксі - буде використано попередній{cl.RESET}"
+                        f"{cl.MAGENTA}{t('Failed to reload proxy list - the previous one will be used')}{cl.RESET}"
                     )
 
             except asyncio.CancelledError:
@@ -341,7 +344,7 @@ async def start(args):
     is_old_version = not await is_latest_version()
     if is_old_version:
         logger.warning(
-            f"{cl.RED}Доступна нова версія - рекомендовано оновитися{cl.RESET}: "
+            f"{cl.CYAN}{t('A new version is available, update is recommended')}{cl.RESET}: "
             "https://telegra.ph/Onovlennya-mhddos-proxy-04-16\n"
         )
 
@@ -372,10 +375,12 @@ async def start(args):
         max_conns -= 50  # keep some for other needs
         if max_conns < connections:
             logger.warning(
-                f"{cl.MAGENTA}Кількість потоків зменшено до {max_conns} через обмеження вашої системи{cl.RESET}"
+                f"{cl.RED}{t('The number of threads has been reduced to')} {max_conns} "
+                f"{t('due to the limitations of your system')}{cl.RESET}"
             )
             connections = max_conns
 
+    # Give user some time to read the info above
     await run_ddos(
         proxies,
         targets_loader,
@@ -401,15 +406,17 @@ def _main_process(args):
     try:
         _main(args)
     except KeyboardInterrupt:
-        logger.info(f'{cl.BLUE}Завершуємо роботу...{cl.RESET}')
+        logger.info(f"{cl.BLUE}{t('Shutting down...')}{cl.RESET}")
         sys.exit()
 
 
 def main():
     args = init_argparse().parse_args()
 
+    set_language(args.lang)
+
     if not any((args.targets, args.config, args.itarmy)):
-        logger.error(f'{cl.RED}Не вказано жодної цілі для атаки{cl.RESET}')
+        logger.error(f"{cl.RED}{t('No targets specified for the attack')}{cl.RESET}")
         sys.exit()
 
     num_copies = args.copies
@@ -418,13 +425,12 @@ def main():
         if num_copies > max_copies:
             num_copies = max_copies
             logger.warning(
-                f'{cl.MAGENTA}Кількість копій автоматично зменшена до {max_copies}{cl.RESET}'
+                f"{cl.RED}{t('The number of copies is automatically reduced to')} {max_copies}{cl.RESET}"
             )
 
         if num_copies > 1 and args.table:
             logger.warning(
-                f'{cl.MAGENTA}Налаштування `--table` не може бути використане '
-                f'при запуску декількох копій{cl.RESET}'
+                f"{cl.MAGENTA}{t('The `--table` flag cannot be used when running multiple copies')}{cl.RESET}"
             )
             args.table = False
 
@@ -440,7 +446,7 @@ def main():
         while not wakeup_event.wait(WINDOWS_WAKEUP_SECONDS):
             continue
     except KeyboardInterrupt:
-        logger.info(f'{cl.BLUE}Завершуємо роботу...{cl.RESET}')
+        logger.info(f"{cl.BLUE}{t('Shutting down...')}{cl.RESET}")
         sys.exit()
 
 
