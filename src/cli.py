@@ -1,10 +1,7 @@
 import argparse
 import random
 
-from .core import (
-    DEFAULT_THREADS, SCHEDULER_FAILURE_DELAY,
-    SCHEDULER_FORK_SCALE, SCHEDULER_INITIAL_CAPACITY
-)
+from .core import DEFAULT_THREADS, SCHEDULER_FORK_SCALE, SCHEDULER_INITIAL_CAPACITY
 from .i18n import LANGUAGES
 from .mhddos import Methods
 
@@ -25,26 +22,19 @@ def init_argparse() -> argparse.ArgumentParser:
         '-t',
         '--threads',
         type=int,
-        default=DEFAULT_THREADS,
-        help=f'Total number of threads to run (default is {DEFAULT_THREADS})',
+        help=f'Number of threads (default is {DEFAULT_THREADS})',
     )
     parser.add_argument(
         '--copies',
         type=int,
         default=1,
-        help='Number of copies to run (default is 1)',
+        help='Number of copies (default is 1)',
     )
     parser.add_argument(
         '--debug',
         action='store_true',
         default=False,
-        help='Print log as text',
-    )
-    parser.add_argument(
-        '--table',
-        action='store_true',
-        default=False,
-        help='Print log as table',
+        help='Detailed log for each target',
     )
     parser.add_argument(
         '--vpn',
@@ -79,7 +69,6 @@ def init_argparse() -> argparse.ArgumentParser:
         '--lang',
         type=str.lower,
         choices=LANGUAGES,
-        default=LANGUAGES[0],
         help='Select language (default is ua)'
     )
 
@@ -102,15 +91,8 @@ def init_argparse() -> argparse.ArgumentParser:
         default=SCHEDULER_FORK_SCALE,
         help='How many tasks to fork on successful connect to the target',
     )
-    parser.add_argument(
-        '--scheduler-failure-delay',
-        type=float,
-        default=SCHEDULER_FAILURE_DELAY,
-        help='Time delay before re-launching failed tasks (seconds)',
-    )
 
     # Deprecated
-    parser.add_argument('-p', '--period', type=int, help='DEPRECATED')
-    parser.add_argument('--proxy-timeout', type=float, help='DEPRECATED')
-    parser.add_argument('--udp-threads', type=int, help='DEPRECATED')
+    parser.add_argument('--table', action='store_true', default=False)
+
     return parser

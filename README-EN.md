@@ -9,19 +9,11 @@
 
 ### ⏱ Recent updates
 
-Update versions for | Mac | Linux | Android | Docker (UA only so far): https://telegra.ph/Onovlennya-mhddos-proxy-04-16
-
-- **21.05.2022**
-  - Added english localization - use flag `--lang EN` (more languages may be added later)
-
-- **18.05.2022**
-  - Added `--copies` option in order to run multiple copies (recommended for use with 4+ CPUs and network > 100 Mb / s).
-
-- **15.05.2022**
-  - Completely updated the asynchronous version, which ensures maximum efficiency and minimum load on the system
-  - Efficient operation with larger values of the `-t` parameter (up to 10k) without the risk of "freezing" the whole system
-  - A brand-new algorithm for load balancing between targets in order to achieve maximum efficiency
-  - Attack types `RGET`, `RHEAD`, `RHEX` and `STOMP` added
+- **25.05.2022** Improved default output - the `--debug` option is no longer required 
+- **24.05.2022** Added auto-update option - see [Running](#2--running-different-options-for-targets-are-given)
+- **21.05.2022** Added english localization - use flag `--lang EN` (more languages may be added later)
+- **18.05.2022** Added `--copies` option in order to run multiple copies (recommended for use with 4+ CPUs and network > 100 Mb / s).
+- **15.05.2022** Completely updated asynchronous version, which ensures maximum efficiency and minimum load on the system
 
 ### 1. 💽 Installation
 
@@ -57,10 +49,10 @@ Install and start Docker: https://docs.docker.com/desktop/#download-and-install
 
 All options can be combined, you can specify them either before and after the list of targets
 
-- Change the workload: `-t XXXX`; the maximum number of simultaneously open connections; the default is 7500 (or 1000 if the machine has only one CPU).
-- To monitor information about the progress, add the `--debug` flag for the text, `--table` for the table-style display
 - Consider adding your IP/VPN to the attack (especially when running on dedicated server), add flag `--vpn`
 - To use targets provided by https://t.me/itarmyofukraine2022, add the `--itarmy` flag  
+- Number of threads: `-t XXXX` - the default is 7500 (or 1000 if the machine has only one CPU).
+- Number of copies: `--copies X` - in case you have 4+ CPU and stable network > 100 Mb/s
 
 ### 4. 📌 Help with finding new proxies for mhddos_proxy
 The script itself and installation instructions are here: https://github.com/porthole-ascend-cinnamon/proxy_finder
@@ -77,7 +69,6 @@ The script itself and installation instructions are here: https://github.com/por
     usage: runner.py target [target ...]
                      [-t THREADS] 
                      [-c URL]
-                     [--table]
                      [--debug]
                      [--vpn]
                      [--http-methods METHOD [METHOD ...]]
@@ -90,11 +81,11 @@ The script itself and installation instructions are here: https://github.com/por
      optional arguments:
       -h, --help             show this help message and exit
       -c, --config URL|path  URL or local path to file with targets list
-      -t, --threads 7500     Total number of threads to run (default is 7500 if CPU > 1, 1000 otherwise)
-      --table / --debug      Print log as table / as text
+      -t, --threads 7500     Number of threads (default is 7500 if CPU > 1, 1000 otherwise)
       --vpn                  Use both my IP and proxies. Optionally, specify a percent of using my IP (default is 10%)
       --proxies URL|path     URL or local path(ex. proxies.txt) to file with proxies to use
       --http-methods GET     List of HTTP(L7) methods to use (default is GET + POST|STRESS).
+      --debug                Detailed log for each target
       --itarmy               Attack targets from https://t.me/itarmyofukraine2022  
       --copies 1             Number of copies to run (default is 1)
       --lang {en,ua}         Select language (default is ua)

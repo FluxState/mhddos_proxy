@@ -13,7 +13,6 @@ SCRIPT_ARGS="${@:2}"
 trap 'shutdown' SIGINT SIGQUIT SIGTERM ERR
 
 function shutdown() {
-    echo "Exiting..."
     stop_script
     exit
 }
@@ -21,7 +20,7 @@ function shutdown() {
 function stop_script() {
   if [ -n "$PID" ];
   then
-    kill -TERM $PID
+    kill -INT $PID
     wait $PID
     PID=""
   fi

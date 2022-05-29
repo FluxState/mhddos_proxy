@@ -1,4 +1,3 @@
-
 - **21.05.2022**
   - Added english localization - use flag `--lang EN` (more languages may be added later)
 
@@ -6,7 +5,7 @@
   - Added `--copies` option in order to run multiple copies (recommended for use with 4+ CPUs and network > 100 Mb / s).
 
 - **15.05.2022**
-  - Completely updated the asynchronous version, which ensures maximum efficiency and minimum load on the system
+  - Completely updated, asynchronous version, which ensures maximum efficiency and minimum load on the system
   - Efficient operation with larger values of the `-t` parameter (up to 10k) without the risk of "freezing" the whole system
   - A brand-new algorithm for load balancing between targets in order to achieve maximum attack efficiency
   - Attack types `RGET`, `RHEAD`, `RHEX` and `STOMP` added

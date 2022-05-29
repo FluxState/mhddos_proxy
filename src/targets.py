@@ -20,10 +20,7 @@ class Target:
     OPTION_RPC = "rpc"
     OPTION_HIGH_WATERMARK = "watermark"
 
-    url: URL
-    method: Optional[str]
-    options: Options
-    addr: Optional[str]
+    __slots__ = ['url', 'method', 'options', 'addr']
 
     def __init__(
         self,
@@ -152,6 +149,7 @@ class TargetsLoader:
 
 
 class TargetStats:
+    __slots__ = ['_target', '_method', '_sig', '_requests', '_bytes', '_conns', '_reset_at']
 
     def __init__(self, target: Target, method: str):
         self._target = target
@@ -164,7 +162,7 @@ class TargetStats:
 
     @property
     def target(self) -> Tuple[Target, str, str]:
-        return (self._target, self._method, self._sig)
+        return self._target, self._method, self._sig
 
     def track(self, rs: int, bs: int) -> None:
         self._requests += rs

@@ -64,7 +64,12 @@ async def fetch(url: str) -> Optional[str]:
 
 
 async def is_latest_version() -> bool:
-    latest = int((await fetch(VERSION_URL)).strip())
+    resp = await fetch(VERSION_URL)
+    if not resp:
+        logger.warning(f'{cl.RED}New version check failed - check your internet connection{cl.RESET}')
+        return True
+
+    latest = int(resp.strip())
     current = int((await read_or_fetch('version.txt')).strip())
     return current >= latest
 
