@@ -1,39 +1,35 @@
+import socket
+from _socket import gaierror
 from asyncio import gather
 from typing import Dict, List, Optional
 
 import dns.exception
 from asyncstdlib.functools import lru_cache
-from dns.asyncresolver import Resolver
-from dns.resolver import NoResolverConfiguration
 
 from .core import cl, logger
 from .i18n import translate as t
 
 
-try:
-    resolver = Resolver(configure=True)
-except NoResolverConfiguration:
-    resolver = Resolver(configure=False)
-
-ns = ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '208.67.222.222', '208.67.220.220']
-resolver.nameservers = ns + list(resolver.nameservers)
+socket.setdefaulttimeout(3)
 
 
 @lru_cache(maxsize=1024)
 async def resolve_host(host: str) -> str:
     if dns.inet.is_address(host):
         return host
-    answer = await resolver.resolve(host)
-    return answer[0].to_text()
+    addrinfo = socket.getaddrinfo(host, 80)
+    answer = addrinfo[0][-1][0]
+    logger.info(f"{cl.RED}{host}{cl.RESET} {cl.YELLOW}resolved to {cl.BLUE}{answer}{cl.RESET}")
+    return answer
 
 
 async def safe_resolve_host(host: str) -> Optional[str]:
     try:
         resolved = await resolve_host(host)
-        if resolved == '127.0.0.1':
+        if resolved in ["127.0.0.1", "0.0.0.0"]:
             raise dns.exception.DNSException('resolved to localhost')
         return resolved
-    except dns.exception.DNSException:
+    except (dns.exception.DNSException, gaierror):
         logger.warning(
             f"{cl.MAGENTA}{t('Target')} {cl.BLUE}{host}{cl.MAGENTA}"
             f""" {t("is not available and won't be attacked")}{cl.RESET}"""
