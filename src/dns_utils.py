@@ -17,8 +17,6 @@ try:
 except NoResolverConfiguration:
     resolver = Resolver(configure=False)
 
-ns = ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '208.67.222.222', '208.67.220.220']
-resolver.nameservers = ns + list(resolver.nameservers)
 
 RESOLVER_MAX_CONCURRENT = 100
 
