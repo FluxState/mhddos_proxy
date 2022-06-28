@@ -277,7 +277,7 @@ async def run_ddos(
     if proxies.has_proxies:
         num_proxies = await proxies.reload(config)
         if num_proxies == 0:
-            logger.error(f"{cl.RED}{t('No working proxies found - stopping the attack')}{cl.RESET}")
+            logger.exception(f"{cl.RED}{t('No working proxies found - stopping the attack')}{cl.RESET}")
             return
 
     await install_targets(initial_targets)
