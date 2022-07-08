@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple
 from aiohttp_socks import ProxyConnector
 from yarl import URL
 
-from .core import CPU_COUNT, IS_DOCKER, PROXY_ALIVE_PRIO_RATE, PROXY_ALIVE_PRIO_THRESHOLD, USE_ONLY_MY_IP
+from .core import CPU_COUNT, IS_DOCKER, PROXY_ALIVE_PRIO_RATE, PROXY_ALIVE_PRIO_THRESHOLD, USE_ONLY_MY_IP, logger
 from .dns_utils import resolve_all
 from .system import fetch, read_or_fetch
 
@@ -157,6 +157,7 @@ async def load_system_proxies(config):
     try:
         proxies = obtain_proxies(raw.decode())
     except Exception:
+        logger.exception("Error while loading system proxies.")
         proxies = []
     proxies = list(map(normalize_url, proxies))
     return proxies

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BRANCH="main"
+BRANCH="local-resolver-2"
 PID=""
 
 RED="\033[1;31m"

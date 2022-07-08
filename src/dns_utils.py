@@ -17,8 +17,6 @@ try:
 except NoResolverConfiguration:
     resolver = Resolver(configure=False)
 
-ns = ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '208.67.222.222', '208.67.220.220']
-resolver.nameservers = ns + list(resolver.nameservers)
 
 RESOLVER_MAX_CONCURRENT = 100
 
@@ -28,7 +26,9 @@ async def _resolve_host(host: str) -> str:
     if dns.inet.is_address(host):
         return host
     answer = await resolver.resolve(host)
-    return answer[0].to_text()
+    result = answer[0].to_text()
+    logger.info(f"{cl.RED}{host}{cl.RESET} {cl.YELLOW}resolved to {cl.BLUE}{result}{cl.RESET}")
+    return result
 
 
 async def _safe_resolve_host(host: str, semaphore: asyncio.Semaphore) -> Optional[str]:
