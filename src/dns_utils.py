@@ -13,28 +13,40 @@ from .i18n import translate as t
 
 
 try:
-    resolver = Resolver(configure=True)
+    resolver_proxies = Resolver(configure=True)
+    resolver_targets = Resolver(configure=True)
 except NoResolverConfiguration:
-    resolver = Resolver(configure=False)
+    resolver_proxies = Resolver(configure=False)
+    resolver_targets = Resolver(configure=False)
 
 ns = ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '208.67.222.222', '208.67.220.220']
-resolver.nameservers = ns + list(resolver.nameservers)
+resolver_proxies.nameservers = ns + list(resolver_proxies.nameservers)
 
 RESOLVER_MAX_CONCURRENT = 100
 
 
 @lru_cache(maxsize=1024)
-async def _resolve_host(host: str) -> str:
+async def _resolve_host(host: str, resolve_type: str = "targets") -> str:
+    if resolve_type == "targets":
+        resolver = resolver_targets
+    else:
+        resolver = resolver_proxies
     if dns.inet.is_address(host):
         return host
     answer = await resolver.resolve(host)
-    return answer[0].to_text()
+    result = answer[0].to_text()
+    logger.info(f"'{host}' resolved to '{result}'")
+    return result
 
 
-async def _safe_resolve_host(host: str, semaphore: asyncio.Semaphore) -> Optional[str]:
+async def _safe_resolve_host(
+        host: str,
+        semaphore: asyncio.Semaphore,
+        resolve_type: str = "targets"
+) -> Optional[str]:
     try:
         async with semaphore:
-            resolved = await _resolve_host(host)
+            resolved = await _resolve_host(host, resolve_type)
         if is_forbidden_ip(resolved):
             raise dns.exception.DNSException("resolved to unsupported address")
         return resolved
@@ -45,7 +57,7 @@ async def _safe_resolve_host(host: str, semaphore: asyncio.Semaphore) -> Optiona
         )
 
 
-async def resolve_all(hosts: List[str]) -> Dict[str, str]:
+async def resolve_all(hosts: List[str], resolve_type: str = "targets") -> Dict[str, str]:
     unresolved_hosts = list(set(
         host
         for host in hosts
@@ -53,7 +65,7 @@ async def resolve_all(hosts: List[str]) -> Dict[str, str]:
     ))
     semaphore = asyncio.Semaphore(RESOLVER_MAX_CONCURRENT)
     answers = await gather(*[
-        _safe_resolve_host(h, semaphore)
+        _safe_resolve_host(h, semaphore, resolve_type)
         for h in unresolved_hosts
     ])
     ips = dict(zip(unresolved_hosts, answers))
@@ -63,13 +75,13 @@ async def resolve_all(hosts: List[str]) -> Dict[str, str]:
     }
 
 
-async def resolve_all_targets(targets: List["Target"]) -> List["Target"]:
+async def resolve_all_targets(targets: List["Target"], resolve_type: str = "targets") -> List["Target"]:
     unresolved_hosts = list(set(
         target.url.host
         for target in targets
         if not target.is_resolved
     ))
-    ips = await resolve_all(unresolved_hosts)
+    ips = await resolve_all(unresolved_hosts, resolve_type)
     for target in targets:
         if not target.is_resolved:
             target.addr = ips.get(target.url.host)

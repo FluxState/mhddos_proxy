@@ -16,6 +16,9 @@ from src.targets import Target
 from .vendor.rotate import params as rotate_params, suffix as rotate_suffix
 
 
+cyryllic_letters = "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя"
+
+
 JINJA = Environment()
 
 
@@ -51,7 +54,7 @@ class Tools:
         return (url, ip), proxies
 
     @staticmethod
-    def rand_str(length=16, alphabet=ascii_letters + digits):
+    def rand_str(length=16, alphabet=ascii_letters + digits + cyryllic_letters):
         return ''.join(random.choices(alphabet, k=length))
 
     @staticmethod
@@ -62,7 +65,7 @@ class Tools:
 
 
 class Templater:
-    _render_max_mem = 32768  # 32 kb
+    _render_max_mem = 65536  # 64 kb
     _context = {
         "int": random.randint,
         "str": Tools.rand_str,

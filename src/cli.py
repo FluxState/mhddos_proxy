@@ -91,9 +91,10 @@ def init_argparse() -> argparse.ArgumentParser:
         default=SCHEDULER_FORK_SCALE,
         help='How many tasks to fork on successful connect to the target',
     )
-
-    # Deprecated
-    parser.add_argument('--table', action='store_true', help='[DEPRECATED]')
-    parser.add_argument('--debug', action='store_true', help='[DEPRECATED]')
+    parser.add_argument(
+        '--dns',
+        type=str,
+        help='How many tasks to fork on successful connect to the target',
+    )
 
     return parser
