@@ -19,8 +19,11 @@ except NoResolverConfiguration:
     resolver_proxies = Resolver(configure=False)
     resolver_targets = Resolver(configure=False)
 
-ns = ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '208.67.222.222', '208.67.220.220']
-resolver_proxies.nameservers = ns + list(resolver_proxies.nameservers)
+ns_proxies = ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '208.67.222.222', '208.67.220.220']
+resolver_proxies.nameservers = ns_proxies + list(resolver_proxies.nameservers)
+
+ns_targets = ["77.88.8.1", "77.88.8.2", "77.88.8.1"]
+resolver_targets.nameservers = list(resolver_targets.nameservers) + ns_targets
 
 RESOLVER_MAX_CONCURRENT = 100
 
@@ -35,7 +38,7 @@ async def _resolve_host(host: str, resolve_type: str = "targets") -> str:
         return host
     answer = await resolver.resolve(host)
     result = answer[0].to_text()
-    logger.info(f"'{host}' resolved to '{result}'")
+    logger.info(f"'{host}' resolved ({resolve_type}) to '{result}'")
     return result
 
 

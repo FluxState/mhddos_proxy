@@ -74,6 +74,7 @@ class ProxySet:
         self._loaded_proxies = proxies
         self._num_proxies = len(self._loaded_proxies)
         self._connections = defaultdict(int)
+
         return self._num_proxies
 
     def pick_random(self) -> Optional[str]:
